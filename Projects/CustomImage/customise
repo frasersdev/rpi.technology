@@ -1,1 +1,52 @@
 #!/bin/bash
+
+# DO NOT RUN - INCOMPLETE
+
+# This script automates a custom image for rpi.technology projects.
+# It must be run as root as it disables the default 'pi' account
+# http://rpi.technology/projects/custom-image/
+
+LogFile="/var/log/customise.log"
+
+BootstrapName="bootstrap-3.3.6-dist"
+BootstrapDownload="https://github.com/twbs/bootstrap/releases/download/v3.3.6/${BootstrapName}.zip"
+
+FontAwesomeName="font-awesome-4.6.3"
+FontAwesomeDownload="http://fontawesome.io/assets/${FontAwesomeName}.zip"
+
+#create new groups
+groupadd www-admin
+
+#create new admin user
+adduser <user>
+usermod -a -G sudo,adm,audio,cdrom,video,input,www-admin <user>
+
+#disable pi user
+usermod -L pi
+sed -i 's/^pi/#pi/' /etc/sudoers
+
+#add http advertisement
+cd /etc/avahi/services
+wget https://raw.githubusercontent.com/frasersdev/rpi.technology/master/Tasks/Zero%20Conf%20%232%20–%20rPI/http.service
+
+#add http software
+apt-get install lighttpd nodejs
+
+#configure http document root
+chgrp www-admin /var/www/html
+chmod g+w /var/www/html
+
+#add http client libraries
+cd /var/www/html
+wget https://raw.githubusercontent.com/frasersdev/rpi.technology/master/Tasks/Web%20Tier%20%233%20-%20Client%20Frameworks/template.html
+mkdir components
+cd components
+wget ${BootstrapDownload}
+wget ${FontAwesomeDownload}
+unzip ${BootstrapName}.zip
+unzip f${FontAwesomeName}.zip
+ln -s ${BootstrapName} bootstrap
+ln -s ${FontAwesomeName} font-awesome
+rm *.zip
+cd /var/www/html
+chown -R <user>:www-admin components template.html 
