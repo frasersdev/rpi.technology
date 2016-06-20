@@ -18,17 +18,18 @@ FontAwesomeDownload="http://fontawesome.io/assets/${FontAwesomeName}.zip"
 
 #prompt for username and check its available
 
-user_exists=0
+UserExists=0
+UserName=""
 
-while [ $user_exists -eq 0 ]
+while [ $UserExists -eq 0 ]
 do
-  read -e -p "Please enter a username: " user_name
-  if [ ! -z "$user_name" ] 
+  read -e -p "Please enter a username: " UserName
+  if [ ! -z "$UserName" ] 
   then
-    user_exists=$(id -u $user_name > /dev/null 2>&1
-    [ $user_exists -eq 0 ] && echo "Sorry that userid is taken"
+    UserExists=$(id -u $UserName > /dev/null 2>&1; echo $?)
+    [ $UserExists -eq 0 ] && echo "Sorry that username is taken"
   else 
-    echo "You must enter a userid"   
+    echo "You must enter a username"   
   fi
 done
 
@@ -37,8 +38,8 @@ done
 groupadd www-admin
 
 #create new admin user
-adduser ${user_name}
-usermod -a -G sudo,adm,audio,cdrom,video,input,www-admin ${user_name}
+adduser ${UserName}
+usermod -a -G sudo,adm,audio,cdrom,video,input,www-admin ${UserName}
 
 #disable pi user
 usermod -L pi
@@ -68,4 +69,4 @@ ln -s ${BootstrapName} bootstrap
 ln -s ${FontAwesomeName} font-awesome
 rm *.zip
 cd /var/www/html
-chown -R ${user_name}:www-admin components template.html 
+chown -R ${UserName}:www-admin components template.html 
